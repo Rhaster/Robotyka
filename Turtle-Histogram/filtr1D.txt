@@ -1,0 +1,154 @@
+from turtle import *
+import ColabTurtle
+import math
+import random
+import numpy as np
+
+#functions ***********BEGGINING*************
+
+#rysowanie pola mapy, na podstawie zdefiniowanego lewego gornego rogu
+def draw_box(left_top_corner_x,left_top_corner_y,color):  
+    #szerokosc przeszkody
+    obstacle_width=1;
+    #wysokosc przeszkody
+    obstacle_height=1;
+    #ukrycie ikony agenta,  
+    turtle1.hideturtle()
+    #wylaczenie rysowania 
+    turtle1.penup()
+    turtle1.setx(left_top_corner_x*factor)
+    turtle1.sety(left_top_corner_y*factor)
+    #wlaczenie rysowania
+    turtle1.pendown()
+    #rysownie wypelnionego kolorem niebieskim prostokata,
+    turtle1.fillcolor(color)
+    turtle1.begin_fill()
+    #ustawiamy poczatkowy kierunek na polnoc, polnoc jest skierowna w prawo,
+    turtle1.setheading(0)
+    turtle1.forward(obstacle_width*factor)
+    turtle1.right(90)
+    turtle1.forward(obstacle_height*factor)
+    turtle1.right(90)
+    turtle1.forward(obstacle_width*factor)
+    turtle1.right(90)
+    turtle1.forward(obstacle_height*factor)
+    turtle1.right(90)
+    turtle1.end_fill()
+
+#pokazanie aktualnego prawdopodobienstwa na mapie,
+#do przerobienia gdy zmienimy wiersz wysowania mapy
+def show_p(mapa_size,world_row_position):
+  for i in range(0,mapa_size):
+    turtle1.penup()
+    temp=i+0.2
+    turtle1.setx(temp*factor)
+    turtle1.sety((world_row_position-0.5)*factor)
+    turtle1.write(np.around(probability[i],decimals=3))
+
+#update prawdopodobienstwa po pomiarze, step1
+def sense(sense_precision,sense_temp,mapa_size):
+  for i in range(0,mapa_size):
+    if(mapa[i]==sense_temp):
+      probability[i]=probability[i]*sense_precision
+    else:
+          probability[i]=probability[i]*(1.-sense_precision)
+  #update prawdopodobienstwa po pomiarze, step2
+  #normalizacja,
+  suma=np.sum(probability)
+  for i in range(0,mapa_size):
+    probability[i]=probability[i]/suma
+
+#pamietamy ze swiat jest cykluczny z 6 trafiamy do 0, za pomoca modulo,
+def move_right(mapa_size,move_precision1,move_precision2,move_precision3):
+  probability_apriori=probability.copy()
+  for i in range(0,mapa_size):
+    probability[i]=probability_apriori[i]*move_precision1
+    probability[i]=probability[i]+probability_apriori[(i-1)%mapa_size]*move_precision2
+    probability[i]=probability[i]+probability_apriori[(i-2)%mapa_size]*move_precision3
+
+def find_max(mapa_size):
+  #szukam max,
+  temp_max=0
+  #numer pola z wartoscia max
+  max_index=0 
+  for i in range(0,mapa_size):
+    if(probability[i]>temp_max):
+      temp_max=probability[i]
+      max_index=i
+  return max_index
+  print('temp_max = ',temp_max)
+
+def show_localized_agent(max_index):
+   for i in range(0,mapa_size):
+     turtle1.penup()#wylaczenie rysowania 
+     turtle1.setx((max_index+0.4)*factor)
+     turtle1.sety((world_row_position-0.8)*factor)
+     #turtle1.write('here')
+   turtle1.showturtle()
+   print('Agent localized itself')
+   #arrow, turtle, circle, square, triangle,classic
+   turtle1.shape("turtle")
+
+def is_localized(mapa_size,world_row_position):
+  max_index=find_max(mapa_size)
+  temp_max=probability[max_index]
+  #sprawdzam czy max jest tylko jeden, jezeli tak wstawiam ikone agenta,
+  count=0
+  for i in range(0,mapa_size):
+    if probability[i]==temp_max:
+      count=count+1 
+  if count==1:
+    show_localized_agent(max_index)
+#functions ***********THE END*************
+
+#PROGRAM GLOWNY
+#rysowani przestszeni, na podstawie lewej dolnej i prawej górnej koordynaty
+drawing_area=Screen()
+setworldcoordinates(-20, -20, 1200, 1200)
+
+turtle1=Turtle() #definicja agenta,
+turtle1.hideturtle()#ukrycie ikony agenta,  
+turtle2=Turtle() #definicja agenta,
+turtle2.hideturtle()#ukrycie ikony agenta,  
+
+#liczba pixeli na jednostkę,
+factor=150 
+
+turtle1.speed(10) #szybkosc rysowania od 1 do 10,
+
+#definicja swiata, jest cykliczny, ruch tylko w prawo, 
+#przechodzac z pola 6 w prawo trafiamy do 0,
+mapa=['yellow','orange','yellow','yellow','orange','yellow','yellow']
+mapa_size=len(mapa)
+
+#wizualizacja swiata
+world_row_position=5
+for i in range(0,mapa_size):
+  draw_box(i,world_row_position,mapa[i])
+
+#inicjacja prawdopodobienstwa
+probability=[]
+for i in range(0,mapa_size):
+  probability.append(1/mapa_size)
+
+#prezentacja finalnego filra histogramowego
+sense_precision=0.8
+move_precision1=0.1#pozostanie w miejscu
+move_precision2=0.8#trafiamy do kratki docelowej  
+move_precision3=0.1#trafiamy do kratki kolejnej
+sense(sense_precision,'orange',mapa_size)
+move_right(mapa_size,move_precision1,move_precision2,move_precision3)
+sense(sense_precision,'yellow',mapa_size)
+move_right(mapa_size,move_precision1,move_precision2,move_precision3)
+sense(sense_precision,'yellow',mapa_size)
+move_right(mapa_size,move_precision1,move_precision2,move_precision3)
+sense(sense_precision,'yellow',mapa_size)
+move_right(mapa_size,move_precision1,move_precision2,move_precision3)
+sense(sense_precision,'orange',mapa_size)
+move_right(mapa_size,move_precision1,move_precision2,move_precision3)
+
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size,world_row_position)
+
+#sprawdzenie czy robot zlokalizowal sie
+is_localized(mapa_size,world_row_position)

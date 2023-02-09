@@ -1,0 +1,109 @@
+from turtle import *
+import ColabTurtle
+import math
+import random
+TURTLE_SIZE = 10
+
+#inicjacja przestrzeni do rysowania,
+drawing_area=Screen()
+setworldcoordinates(0, 0, 1200, 1000)#ustawienie wspolrzeędnej pixelowej dolej i górnej,
+
+speed(1) #szybkosc rysowania od 1 do 10,
+factor=200 #liczba pixeli na jednostkę,
+iter_number=10 # liczba iteracji wygladzania
+
+turtle1=Turtle() #definicja agenta,
+
+hideturtle() #make the turtle invisible
+penup() 
+
+x=[.5,1.5,2.5,2.5,2.5,2.5,2.5,3.5,4.5] 
+y=[4.5,4.5,4.5,3.5,2.5,1.5,.5,.5,.5] 
+
+#przykladowe rysowanie prostokatnej przeszkody:
+#lewa górna współrzędna przeszkody
+left_top_corner_x=1
+left_top_corner_y=3
+obstacle_width=1;#szerokosc przeszkody
+obstacle_height=3;#wysokosc przeszkody
+turtle1.hideturtle()#ukrycie ikony agenta,  
+turtle1.penup()#wylaczenie rysowania 
+turtle1.setx(left_top_corner_x*factor)
+turtle1.sety(left_top_corner_y*factor)
+turtle1.showturtle() #odkrycie ikony agenta
+turtle1.pendown()#wlaczenie rysowania
+#rysownie wypelnionego kolorem niebieskim prostokata,
+turtle1.fillcolor('blue')
+turtle1.begin_fill()
+turtle1.setheading(0)#ustawiamy poczatkowy kierunek na polnoc, pólnoc jest skierowna w prawo,
+turtle1.forward(obstacle_width*factor)
+turtle1.right(90)
+turtle1.forward(obstacle_height*factor)
+turtle1.right(90)
+turtle1.forward(obstacle_width*factor)
+turtle1.right(90)
+turtle1.forward(obstacle_height*factor)
+turtle1.right(90)
+turtle1.end_fill()
+
+#przykladowe rysowanie prostokatnej przeszkody:
+#lewa górna współrzędna przeszkody
+left_top_corner_x=3
+left_top_corner_y=5
+obstacle_width=1;#szerokosc przeszkody
+obstacle_height=3;#wysokosc przeszkody
+turtle1.hideturtle()#ukrycie ikony agenta,  
+turtle1.penup()#wylaczenie rysowania 
+turtle1.setx(left_top_corner_x*factor)
+turtle1.sety(left_top_corner_y*factor)
+turtle1.showturtle() #odkrycie ikony agenta
+turtle1.pendown()#wlaczenie rysowania
+#rysownie wypelnionego kolorem niebieskim prostokata,
+turtle1.fillcolor('blue')
+turtle1.begin_fill()
+turtle1.setheading(0)#ustawiamy poczatkowy kierunek na polnoc, pólnoc jest skierowna w prawo,
+turtle1.forward(obstacle_width*factor)
+turtle1.right(90)
+turtle1.forward(obstacle_height*factor)
+turtle1.right(90)
+turtle1.forward(obstacle_width*factor)
+turtle1.right(90)
+turtle1.forward(obstacle_height*factor)
+turtle1.right(90)
+turtle1.end_fill()
+
+#path smoothing
+x0=x
+y0=y
+alpha=.1
+beta=.1
+for i0 in range(0,iter_number):
+  for i in range(1,8):
+    print('do uzupelnienia')
+    #part1
+    #TU WPISUJEMY KOD  
+    #part2
+    #TU WPISUJEMY KOD     
+#the end of path smoothing
+
+setx(x[0]*factor)
+sety(y[0]*factor)
+dot(20, "blue")
+
+print(distance(x[1]*factor, y[1]*factor))
+
+angle=math.atan2(y[1]*factor-y[0]*factor,x[1]*factor-x[0]*factor)*180/3.14
+setheading(angle)
+
+showturtle() #make the turtle visible
+pendown() 
+
+#rysowanie trasy przez punkty sciezki
+for i in range(1,9):
+  #ustalanie kierunku agenta do kolejnego punktu sciezki,
+  angle=math.atan2(y[i]*factor-y[i-1]*factor,x[i]*factor-x[i-1]*factor)*180/3.14
+  setheading(angle)
+  forward(distance(x[i]*factor, y[i]*factor))
+  dot(10, "blue")
+  if i==8:
+    dot(20, "green")

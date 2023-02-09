@@ -1,0 +1,5 @@
+#mapa
+mapa=[['red','blue','red','orange','red','blue'],
+['blue','orange','blue','orange','blue','blue'],
+['orange','red','orange','red','yellow','red'],
+['orange','orange','red','blue','yellow','yellow']]

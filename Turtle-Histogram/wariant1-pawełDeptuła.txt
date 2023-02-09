@@ -1,0 +1,447 @@
+from turtle import *
+import ColabTurtle
+import math
+import random
+import numpy as np
+import time
+import matplotlib.pyplot as plt
+#import Pillow as pil
+
+#functions ***********Bvvvvvvvvvvv  vvvvvvvvvvvvvvvvvvvvvvvvEGGINING*************
+""" 
+draw_box#rysowanie pola mapy, na podstawie zdefiniowanego lewego gornego rogu
+
+#pokazanie aktualnego prawdopodobienstwa na mapie,
+#do przerobienia gdy zmienimy wiersz wysowania mapy
+def show_p(mapa_size, world_row_position): 
+vvvvvvvvvvvvvvvvvvvv
+#update prawdopodobienstwa po pomiarze, step1
+def sense(sense_precision, sense_temp, mapa_size):
+"""
+
+turtle3 = Turtle()
+
+
+#rysowanie pola mapy, na podstawie zdefiniowanego lewego gornego rogu
+def draw_box(left_top_corner_x, left_top_corner_y, color):  #
+  #szerokosc przeszkody
+  obstacle_width = 1
+  #wysokosc przeszkody
+  obstacle_height = 1
+  #ukrycie ikony agenta,
+  turtle1.hideturtle()
+  #wylaczenie rysowania
+  left_top_corner_x += 2
+  left_top_corner_y += 2
+  turtle1.penup()
+  turtle1.setx(left_top_corner_x * factor)
+  turtle1.sety(left_top_corner_y * factor)
+  #wlaczenie rysowania
+  turtle1.pendown()
+  #rysownie wypelnionego kolorem niebieskim prostokata,
+  turtle1.fillcolor(color)
+  turtle1.begin_fill()
+  #ustawiamy poczatkowy kierunek na polnoc, polnoc jest skierowna w prawo,
+  turtle1.setheading(0)
+  turtle1.forward(obstacle_width * factor)
+  turtle1.right(90)
+  turtle1.forward(obstacle_height * factor)
+  turtle1.right(90)
+  turtle1.forward(obstacle_width * factor)
+  turtle1.right(90)
+  turtle1.forward(obstacle_height * factor)
+  turtle1.right(90)
+  turtle1.end_fill()
+
+
+#pokazanie aktualnego prawdopodobienstwa na mapie,
+#do przerobienia gdy zmienimy wiersz wysowania mapy
+def show_p(mapa_size, mapa_size2):  #
+  turtle3.clear()
+  for i in range(0, mapa_size):
+    for j in range(0, mapa_size2):
+      turtle3.penup()
+      j += 2
+      i += 2
+      temp = j + 0.2
+      turtle3.setx(temp * factor)
+      turtle3.sety((i - 0.5) * factor)
+      j -= 2
+      i -= 2
+      turtle3.pendown()
+      turtle3.write(np.around(probability[i][j], decimals=3))
+
+
+#update prawdopodobienstwa po pomiarze, step1
+def sense(sense_precision, sense_temp, mapa_size, mapa_size2):  #
+  global propability
+  for i in range(0, mapa_size):
+    for j in range(0, mapa_size2):
+      if (mapa[i][j] == sense_temp):
+        probability[i][j] = probability[i][j] * sense_precision
+      else:
+        probability[i][j] = probability[i][j] * (1 - sense_precision)
+  #update prawdopodobienstwa po pomiarze, step2
+  #normalizacja,
+  suma = np.sum(probability)
+  for i in range(0, mapa_size):
+    for j in range(0, mapa_size2):
+      probability[i][j] = probability[i][j] / suma
+
+
+#done
+def move_right(mapa_size, mapa_size2, move_precision1, move_precision2,
+               move_precision3):  #
+  global probability
+  probability_apriori = probability.copy()
+  for i in range(0, mapa_size):
+    for j in range(0, mapa_size2):
+      #w miejscu
+      probability[i][j] = probability_apriori[i][j] * move_precision1
+      if (j - 1 > 0):
+        #cel
+        probability[i][j] = probability[i][j] + probability_apriori[
+          (i)][(j - 1)] * move_precision2
+      if (j - 2 > 0):
+        #za cel
+        probability[i][j] = probability[i][j] + probability_apriori[
+          (i)][j - 2] * move_precision1
+
+
+#done
+def move_up(mapa_size, mapa_size2, move_precision1, move_precision2,
+            move_precision3):  #
+  global probability
+  probability_apriori = probability.copy()
+  for i in range(0, mapa_size):
+    for j in range(0, mapa_size2):
+      probability[i][j] = probability_apriori[i][j] * move_precision1
+      if (i - 1 > 0):
+        probability[i][j] = probability[i][j] + probability_apriori[
+          (i - 1)][(j)] * move_precision2
+      if (i - 2 > 0):
+        probability[i][j] = probability[i][j] + probability_apriori[
+          (i - 2)][j] * move_precision1
+
+
+#done
+def move_down(mapa_size, mapa_size2, move_precision1, move_precision2,
+              move_precision3):  #
+  global probability
+  probability_apriori = probability.copy()
+  for i in range(0, mapa_size):
+    for j in range(0, mapa_size2):
+      probability[i][j] = probability_apriori[i][j] * move_precision1
+      if (i + 1 < mapa_size):
+        probability[i][j] = probability[i][j] + probability_apriori[
+          (i + 1)][(j)] * move_precision2
+      if (i + 2 < mapa_size):
+        probability[i][j] = probability[i][j] + probability_apriori[
+          (i + 2)][j] * move_precision1
+
+
+#done
+def move_left(mapa_size, mapa_size2, move_precision1, move_precision2,
+              move_precision3):  #
+  global probability
+  probability_apriori = probability.copy()  ## 1 3 4 5 = 0.1  # 2 = 0.6
+  for i in range(0, mapa_size):  ## i=4-
+    for j in range(0, mapa_size2):  ## j=6
+      #w miejscu
+      probability[i][j] = probability_apriori[i][j] * move_precision1
+      if (j + 1 < mapa_size2):
+        #cel
+        probability[i][j] = probability[i][j] + probability_apriori[
+          (i)][(j + 1)] * move_precision2
+      if (j + 2 < mapa_size2):
+        #za cel
+        probability[i][j] = probability[i][j] + probability_apriori[
+          (i)][j + 2] * move_precision1
+
+
+global propability
+global max_index2
+
+
+def find_max_prop(mapa_size, mapa_size2, prop):  ##
+  #szukam max,
+
+  max_i = 0
+  max_j = 0
+  temp_max = 0
+  for i in range(0, mapa_size):
+    for j in range(0, mapa_size2):
+      if (prop[i][j] > temp_max):
+        temp_max = probability[i][j]
+        max_i = i
+        max_j = j
+  return max_i, max_j
+
+
+def find_max(mapa_size, mapa_size2):  ##
+  #szukam max,
+  temp_max = 0
+  global max_index2
+  max_index2 = 0
+  #numer pola z wartoscia max
+  max_index = 0
+  for i in range(0, mapa_size):
+    for j in range(0, mapa_size2):
+      if (probability[i][j] > temp_max):
+        temp_max = probability[i][j]
+        max_index = i
+        max_index2 = j
+  return max_index
+
+
+def show_localized_agent(max_index, max_index2):
+  global islocalised
+  turtle1.penup()  #wylaczenie rysowania
+  turtle1.setx((max_index + 2.5) * factor)
+  turtle1.sety((max_index2 + 1.4) * factor)
+  #turtle1.write('here')
+  turtle1.showturtle()
+  print('Agent localized itself')
+  print(turtle1.xcor(), turtle1.ycor())
+  #arrow, turtle, circle, square, triangle,classic
+  turtle1.shape("turtle")
+  islocalised = True
+
+
+def is_localized(mapa_size, mapa_size2):
+  max_index = find_max(mapa_size, mapa_size2)
+  global max_index2
+  temp_max = probability[max_index][max_index2]
+  #sprawdzam czy max jest tylko jeden, jezeli tak wstawiam ikone agenta,
+  count = 0
+  for i in range(0, mapa_size):
+    for j in range(0, mapa_size2):
+      if probability[i][j] == temp_max:
+        count = count + 1
+  if count == 1:
+    if (temp_max < 0.250):
+      print("nie  odnalazl sie na 100%")
+    else:
+      print("odnalazl sie ")
+      show_localized_agent(max_index2, max_index)
+      print("Y = ", max_index)
+      print("X = ", max_index2)
+
+
+#functions ***********THE END*************
+#PROGRAM GLOWNYvvv
+#rysowani przestszeni, na podstawie lewej dolnej i prawej górnej koordynaty
+#functions ***********THE END*************
+#PROGRAM GLOWNYvvv
+#rysowani przestszeni, na podstawie lewej dolnej i prawej górnej koordynaty
+drawing_area = Screen()
+setworldcoordinates(-20, -20, 1200, 1200)
+
+turtle1 = Turtle()  #definicja agenta,
+turtle1.hideturtle()  #ukrycie ikony agenta,
+turtle2 = Turtle()  #definicja agenta,
+turtle2.hideturtle()  #ukrycie ikony agenta,
+
+#liczba pixeli na jednostkę,
+factor = 150
+
+turtle1.speed(10)  #szybkosc rysowania od 1 do 10,
+
+#definicja swiata, jest cykliczny, ruch tylko w prawo,
+#przechodzac z pola 6 w prawo trafiamy do 0,
+mapa = [['red', 'blue', 'red', 'orange', 'red', 'blue'],
+        ['blue', 'orange', 'blue', 'orange', 'blue', 'blue'],
+        ['orange', 'red', 'orange', 'red', 'yellow', 'red'],
+        ['orange', 'orange', 'red', 'blue', 'yellow', 'yellow']]
+mapa_size = len(mapa)
+mapa_size2 = len(mapa[0])
+### flaga czy robot sie zlokalizowal uzywana do sprawdzania czy jest przy scianie
+islocalised = False
+#wizualizacja swiata
+world_row_position = 5
+for i in range(0, mapa_size):
+  for j in range(0, mapa_size2):
+    draw_box(j, i, mapa[i][j])
+#inicjacja prawdopodobienstwa
+global probability
+probability = np.zeros((mapa_size, mapa_size2))
+for i in range(0, mapa_size):
+  for j in range(0, mapa_size2):
+    probability[i][j] = (1 / mapa_size)
+
+#prezentacja finalnego filra histogramowego
+sense_precision = 0.8
+move_precision1 = 0.1  #pozostanie w miejscu
+move_precision2 = 0.8  #trafiamy do kratki docelowej
+move_precision3 = 0.1  #trafiamy do kratki kolejne
+"""  test dla lewej i górnej sciany z zatrzymaniem
+print("iteracja 1")
+sense(sense_precision, 'yellow', mapa_size, mapa_size2)
+move_left(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size, mapa_size2, world_row_position)
+
+#sprawdzenie czy robot zlokalizowal sie
+#is_localized(mapa_size, mapa_size2, world_row_position)
+time.sleep(5)
+print("iteracja 2")
+sense(sense_precision, 'blue', mapa_size, mapa_size2)
+move_left(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size, mapa_size2, world_row_position)
+
+#sprawdzenie czy robot zlokalizowal sie
+is_localized(mapa_size, mapa_size2, world_row_position)
+time.sleep(5)
+print("iteracja 3")
+sense(sense_precision, 'red', mapa_size, mapa_size2)
+move_left(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size, mapa_size2, world_row_position)
+
+#sprawdzenie czy robot zlokalizowal sie
+is_localized(mapa_size, mapa_size2, world_row_position)
+time.sleep(5)
+print("iteracja 4")
+sense(sense_precision, 'red', mapa_size, mapa_size2)
+move_left(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size, mapa_size2, world_row_position)
+
+#sprawdzenie czy robot zlokalizowal sie
+is_localized(mapa_size, mapa_size2, world_row_position)
+time.sleep(5)
+print("iteracja 5")
+sense(sense_precision, 'orange', mapa_size, mapa_size2)
+move_left(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size, mapa_size2, world_row_position)
+
+#sprawdzenie czy robot zlokalizowal sie
+is_localized(mapa_size, mapa_size2, world_row_position)
+time.sleep(5)
+
+print("iteracja 6")
+sense(sense_precision, 'orange', mapa_size, mapa_size2)
+move_left(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size, mapa_size2, world_row_position)
+
+#sprawdzenie czy robot zlokalizowal sie
+is_localized(mapa_size, mapa_size2, world_row_position)
+time.sleep(5)
+print("iteracja 7 w góre")
+sense(sense_precision, 'orange', mapa_size, mapa_size2)
+move_up(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size, mapa_size2, world_row_position)
+
+#sprawdzenie czy robot zlokalizowal sie
+is_localized(mapa_size, mapa_size2, world_row_position)
+time.sleep(5)
+print("iteracja 8 w dół")
+sense(sense_precision, 'orange', mapa_size, mapa_size2)
+move_down(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size, mapa_size2, world_row_position)
+
+#sprawdzenie czy robot zlokalizowal sie
+is_localized(mapa_size, mapa_size2, world_row_position)
+time.sleep(5)
+"""
+"""
+### test dla lewej sciany i przypadkiem stania w miejscu
+print("iteracja 1")
+sense(sense_precision, 'blue', mapa_size, mapa_size2)
+move_up(mapa_size, mapa_size2, move_precision1, move_precision2,
+        move_precision3)
+
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size, mapa_size2, world_row_position)
+
+#sprawdzenie czy robot zlokalizowal sie
+#is_localized(mapa_size, mapa_size2, world_row_position)
+time.sleep(5)
+print("iteracja 2")
+sense(sense_precision, 'orange', mapa_size, mapa_size2)
+move_left(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size, mapa_size2, world_row_position)
+
+#sprawdzenie czy robot zlokalizowal sie
+is_localized(mapa_size, mapa_size2, world_row_position)
+time.sleep(5)
+print("iteracja 3")
+sense(sense_precision, 'orange', mapa_size, mapa_size2)
+move_left(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size, mapa_size2, world_row_position)
+
+#sprawdzenie czy robot zlokalizowal sie
+is_localized(mapa_size, mapa_size2, world_row_position)
+time.sleep(5)
+print("iteracja 4")
+sense(sense_precision, 'blue', mapa_size, mapa_size2)
+move_left(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+#pokazanie obliczonego prawdopodobienstwa lokalizacji robota
+show_p(mapa_size, mapa_size2, world_row_position)
+"""
+############################################################
+#sprawdzenie czy robot zlokalizowal sie
+#is_localized(mapa_size, mapa_size2, world_row_position)
+#TEST Dla prawej sciany i dolnej wraz z poslizgiem o 1 krok
+sense(sense_precision, 'red', mapa_size, mapa_size2)
+move_right(mapa_size, mapa_size2, move_precision1, move_precision2,
+           move_precision3)
+show_p(mapa_size, mapa_size2)
+is_localized(mapa_size, mapa_size2)
+sense(sense_precision, 'red', mapa_size, mapa_size2)
+move_up(mapa_size, mapa_size2, move_precision1, move_precision2,
+        move_precision3)
+show_p(mapa_size, mapa_size2)
+is_localized(mapa_size, mapa_size2)
+sense(sense_precision, 'blue', mapa_size, mapa_size2)
+move_right(mapa_size, mapa_size2, move_precision1, move_precision2,
+           move_precision3)
+show_p(mapa_size, mapa_size2)
+is_localized(mapa_size, mapa_size2)
+sense(sense_precision, 'orange', mapa_size, mapa_size2)
+move_right(mapa_size, mapa_size2, move_precision1, move_precision2,
+           move_precision3)
+show_p(mapa_size, mapa_size2)
+is_localized(mapa_size, mapa_size2)
+sense(sense_precision, 'blue', mapa_size, mapa_size2)
+move_right(mapa_size, mapa_size2, move_precision1, move_precision2,
+           move_precision3)
+show_p(
+  mapa_size,
+  mapa_size2,
+)
+is_localized(mapa_size, mapa_size2)
+sense(sense_precision, 'blue', mapa_size, mapa_size2)
+move_right(mapa_size, mapa_size2, move_precision1, move_precision2,
+           move_precision3)
+show_p(mapa_size, mapa_size2)
+is_localized(mapa_size, mapa_size2)
+sense(sense_precision, 'blue', mapa_size, mapa_size2)
+move_down(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+show_p(mapa_size, mapa_size2)
+is_localized(mapa_size, mapa_size2)
+sense(sense_precision, 'blue', mapa_size, mapa_size2)
+move_down(mapa_size, mapa_size2, move_precision1, move_precision2,
+          move_precision3)
+show_p(mapa_size, mapa_size2)
+is_localized(mapa_size, mapa_size2)

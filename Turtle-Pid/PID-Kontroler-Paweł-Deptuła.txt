@@ -1,0 +1,155 @@
+from turtle import *
+import ColabTurtle
+import math
+import random
+import matplotlib.pyplot as plt
+#rysowani przestszeni, na podstawie lewej dolnej i prawej górnej koordynaty
+drawing_area = Screen()
+setworldcoordinates(-20, -20, 1200, 1000)
+
+factor = 150  #liczba pixeli na jednostkę,
+
+#*****START**********************************************
+#rysujemy prostą łączącą start (x_start,y_start) i cel (x_stop,y_stop)
+#prosta wskazuje idealną trasę poniędzy tymi punktami,
+#lewy dolny róg to współrzędne (0,0)
+
+#definikujemy agenta turtle1
+turtle1 = Turtle()
+turtle1.speed(10)
+turtle1.hideturtle()
+turtle1.penup()
+x_stop = 4
+y_stop = 6.5
+turtle1.setx(x_stop * factor)
+turtle1.sety(y_stop * factor)
+turtle1.dot(20, "green")
+
+turtle1.hideturtle()
+turtle1.penup()
+x_start = 4
+y_start = 0
+turtle1.setx(x_start * factor)
+turtle1.sety(y_start * factor)
+turtle1.dot(20, "blue")
+
+turtle1.showturtle()  #make the turtle invisible
+turtle1.pendown()
+
+turtle1.setheading(
+  math.atan2(y_stop * factor - y_start * factor,
+             x_stop * factor - x_start * factor) * 180 / 3.14)
+
+while turtle1.pos()[1] / factor < y_stop:
+  turtle1.forward(0.1 * factor)
+turtle1.hideturtle()
+#koniec rysowania prostej
+#*****STOP**********************************************
+
+#*****START**********************************************
+#ustawienie agenta turtle2 na pozycji startowej (x_start,y_start)
+turtle2 = Turtle()
+#arrow, turtle, circle, square, triangle,classic
+turtle2.shape("turtle")
+turtle2.color('red')
+turtle2.speed(10)  #szybkosc rysowania od 1 do 10,
+turtle2.hideturtle()
+turtle2.penup()
+turtle2.setx(x_start * factor)
+turtle2.sety(y_start * factor)
+actual_x = x_start
+actual_y = y_start
+kierunek_cel = math.atan2(y_stop * factor - actual_y * factor,
+                          x_stop * factor - actual_x * factor) * 180 / 3.14
+turtle2.setheading(kierunek_cel)
+turtle2.showturtle()
+turtle2.pendown()
+print('kierunek_cel=', kierunek_cel)
+#*****STOP**********************************************
+
+#bazowa predkosc kol
+turtle2_left_wheel = 100
+turtle2_right_wheel = 100
+temp_direction = (kierunek_cel -
+                  (turtle2_left_wheel - turtle2_right_wheel)) % 360
+print('direction = ', temp_direction)
+
+
+#*****START**********************************************
+#kontroler P, przemieszcznie się z punku (x_start,y_start) do punktu (x_stop,y_stop).
+def convert(kierunek_cel, temp_direction):
+  #print('temp_direction=',temp_direction)
+  #=',kierunek_cel)
+  temp_direction = kierunek_cel - temp_direction
+  if temp_direction > 180:
+    temp_direction = temp_direction - 360
+  if temp_direction < -180:
+    temp_direction = 360 + temp_direction
+  return temp_direction
+
+
+#test
+#print('convert1 = ',convert(90,100))#result -10
+#print('convert2 = ',convert(90,80))#result 10
+x = []
+y = kierunek_cel
+
+
+def steer(turtle2_left_wheel, turtle2_right_wheel, kierunek_cel,
+          temp_direction, steering_range, reality_gap, ksi, beta, errorholder,
+          errorprev):
+  print('inside steer')
+  errorholder += errorprev
+  cte = convert(kierunek_cel, temp_direction)
+  error = cte - errorprev
+  if cte <= 0:
+    if abs(cte) > steering_range:
+      turtle2_right_wheel = 0
+    else:
+      turtle2_right_wheel = turtle2_left_wheel + (
+        ksi * cte + step * errorholder + beta * error)
+  if cte > 0:
+    if cte > steering_range:
+      turtle2_left_wheel = 0
+    else:
+      turtle2_left_wheel = turtle2_right_wheel - (
+        ksi * cte + step * errorholder + beta * error)
+  print('turtle2_left_wheel=', turtle2_left_wheel, 'turtle2_right_wheel=',
+        turtle2_right_wheel)
+  nowy_kierunek = kierunek_cel + beta * (turtle2_right_wheel -
+                                         turtle2_left_wheel)
+  nowy_kierunek = nowy_kierunek % 360
+  nowy_kierunek = (nowy_kierunek + reality_gap) % 360
+  errorprev = cte
+  print('nowy_kierunek=', nowy_kierunek)
+  return nowy_kierunek
+
+
+#sterowanie za pomocą kontrolera P,
+#ustalam bazową prędkosć kół
+turtle2_left_wheel = 50
+turtle2_right_wheel = 50
+steering_range = 50
+#startowy, losowy kierunek robota
+temp_direction = random.choice(
+  [kierunek_cel - 2 * steering_range, kierunek_cel + 2 * steering_range])
+#### zmienne sterujace
+step = 0.2
+beta = 0.2
+ksi = 0.5
+###
+### Rezerwacja pamieci pod zmienne
+errorprev = 0
+errorholder = 0
+#####
+while turtle2.pos()[1] / factor < y_stop:
+  reality_gap = random.choice([-10, 10])
+  temp_direction = steer(turtle2_left_wheel, turtle2_right_wheel, kierunek_cel,
+                         temp_direction, steering_range, reality_gap, ksi,
+                         beta, errorholder, errorprev)
+  turtle2.setheading(temp_direction)
+  turtle2.forward(step * factor)
+  #*****STOP**********************************************
+print('turtle2.heading()', turtle2.heading())
+#******dodatek*****
+#random.randrange(0,180,1) #losowamnie liczb z przedzału, co ustaloną wartość,
